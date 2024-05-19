@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Weather Conditions</title>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <link rel="stylesheet"
+              href="https://fonts.googleapis.com/css?family=Roboto:700,|Google+Sans:400,500&amp;lang=en&amp;display=swap">
+        <!--         <link rel="stylesheet" href="style.css"> -->
+        <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
+    </head>
+    <body>
+        <h1 style="margin-bottom: 0;">The Group 10</h1>
+        <h2 style="margin-top: 0;">Weather Station</h2>
+
+        <div id="canvas-container">
+            <canvas id="weather-chart"></canvas>
+        </div>
+
+        <p><b>Temperature Statistics:</b> <span id="avg_temp"></span> avg / <span id="min_temp"></span> min / <span
+                id="max_temp"></span> max</p>
+        <p><b>Humidity Statistics: </b> <span id="avg_hum"></span> avg / <span id="min_hum"></span> min / <span
+                id="max_hum"></span> max</p>
+
+        <p>
+            <label>
+                Showing
+                <input type="number" id="datapoint-count" value="20"/>
+                latest datapoints
+            </label>
+        </p>
+
+        <p>Last refresh at <span id="last_refresh_time"></span></p>
+
+        <p>Our Lab 4 server interface was adapted from our project's code</p>
+
+        <button onclick="clearHistory()" id="clear-button">Clear History</button>
+
+        <script src="{{url_for('static', filename='script.js')}}"></script>
+    </body>
+</html>

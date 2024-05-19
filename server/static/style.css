@@ -1,0 +1,25 @@
+body {
+    font-family: "Google Sans", "Roboto", sans-serif;
+}
+
+p {
+    margin: 8px 0;
+}
+
+#canvas-container {
+    margin: 0 auto;
+    max-width: 80vw !important;
+    max-height: 60vh !important;
+}
+
+#clear-button {
+    background-color: rgb(255, 192, 203, 0.8);
+    border: 1px solid black;
+    border-radius: 24px;
+    padding: 6px 12px;
+    color: black;
+}
+
+#datapoint-count {
+    width: 50px;
+}
