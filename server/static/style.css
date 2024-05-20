@@ -1,5 +1,8 @@
 body {
     font-family: "Google Sans", "Roboto", sans-serif;
+    margin-left: 40px;
+    margin-right: 40px;
+    min-width: 600px;
 }
 
 p {
@@ -7,9 +10,15 @@ p {
 }
 
 #canvas-container {
-    margin: 0 auto;
-    max-width: 80vw !important;
-    max-height: 60vh !important;
+    position: relative;
+    max-width: 500px !important;
+}
+
+#last_refresh_time {
+    background-color: rgb(229, 237, 218);
+    padding-left: 8px;
+    padding-right: 8px;
+    border-radius: 10px;
 }
 
 #clear-button {
@@ -22,4 +31,35 @@ p {
 
 #datapoint-count {
     width: 50px;
+    text-align: center;
+    -moz-appearance: textfield;
+    background-color: rgb(230, 245, 255);
+    border: 1px lightskyblue solid;
+    border-radius: 10px;
+}
+
+/* Number input arrows */
+#datapoint-count::-webkit-outer-spin-button,
+#datapoint-count::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+}
+
+#title-card {
+    display: flex;
+    align-items: center;
+}
+
+#logo {
+    background-image: url("https://www.mfc.ms.gov/wp-content/uploads/2020/11/Smokey-Head-768x871.png");
+    background-size: cover;
+    height: 80px;
+    width: 80px;
+    display: inline-block;
+    vertical-align: bottom;
+    margin-right: 5px;
+}
+
+#footer {
+    position: fixed;
+    bottom: 0;
 }
