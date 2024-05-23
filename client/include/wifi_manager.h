@@ -1,5 +1,5 @@
-#ifndef LAB4_WIFI_MANAGER_H
-#define LAB4_WIFI_MANAGER_H
+#ifndef CS147_WIFI_MANAGER_H
+#define CS147_WIFI_MANAGER_H
 
 
 #include "HttpClient.h"
@@ -24,4 +24,4 @@ private:
 };
 
 
-#endif //LAB4_WIFI_MANAGER_H
+#endif //CS147_WIFI_MANAGER_H

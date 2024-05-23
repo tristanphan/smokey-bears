@@ -3,11 +3,11 @@
 #include <cstdio>
 
 #include "wifi_manager.h"
-#include "sensor.h"
 #include "config.h"
+#include "sensors/temperature_sensor.h"
 
 WiFiManager wifi{};
-Sensor sensor{};
+TemperatureSensor temperature_sensor{};
 
 
 void setup() {
@@ -18,21 +18,23 @@ void setup() {
     String password;
     WiFiManager::retrieve_credentials(&ssid, &password);
     WiFiManager::connect(ssid, password);
-    sensor.initialize();
+    temperature_sensor.initialize();
 }
 
 void loop() {
-    if (!sensor.read()) {
-        Serial.printf("Failed to read sensor data\n");
+    bool temperature_success = temperature_sensor.read();
+    if (!temperature_success) {
+        Serial.printf("Failed to read temperature_sensor data\n");
         delay(1000);
         return;
     }
-    float temperature = sensor.get_temperature();
-    float humidity = sensor.get_humidity();
+
+    float temperature = temperature_sensor.get_temperature();
+    float humidity = 0; // TODO Change to gas temperature_sensor
     char path[50];
     sprintf(path, PATH, temperature, humidity);
     String body = wifi.get(HOSTNAME, PORT, path);
-    wifi.stop();
     Serial.printf("Response: %s\n", body.c_str());
+    wifi.stop();
     delay(1000);
 }
