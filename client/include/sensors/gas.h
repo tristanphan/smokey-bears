@@ -8,7 +8,7 @@ class GasSensor {
 public:
     void initialize();
 
-    int get_gas_level(); // percentage of gas level
+    float get_gas_level(); // percentage of gas level
 
 };
 

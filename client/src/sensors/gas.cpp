@@ -4,7 +4,9 @@ void GasSensor::initialize() {
     // This is empty, but kept for consistency
 }
 
-int GasSensor::get_gas_level() {
+float GasSensor::get_gas_level() {
     int analog_value = analogRead(MQ2_PIN);
-    return map(analog_value, 0, 4095, 0, 100);
+    float percentage = ((float) analog_value / 4096) * 100;
+    Serial.printf("[GAS SENSOR] Gas Level: %d / 4096 ≈ %.2f / 100\n", analog_value, percentage);
+    return percentage;
 }

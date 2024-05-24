@@ -27,7 +27,7 @@ void WiFiManager::retrieve_credentials(String *ssid, String *password) {
     }
     Serial.printf("Done\n");
 
-    Serial.printf("Retrieving SSID/PASSWD\n");
+    Serial.printf("Retrieving SSID/PASSWD... ");
     char ssid_buffer[50];
     char pass_buffer[50];
     size_t ssid_len = 50;

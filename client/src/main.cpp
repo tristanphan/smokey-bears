@@ -30,7 +30,7 @@ void setup() {
 
 void loop() {
     float temperature = temperature_sensor.get_temperature();
-    int humidity = gas_sensor.get_gas_level();
+    float humidity = gas_sensor.get_gas_level();
     char path[50];
     sprintf(path, PATH, temperature, humidity);
     String body = wifi.get(HOSTNAME, PORT, path);
