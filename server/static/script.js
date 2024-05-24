@@ -9,18 +9,18 @@ const chart = new Chart(ctx, {
             borderWidth: 1,
             yAxisID: "temperature",
         }, {
-            label: "Gas Concentration (PPM)",
+            label: "Gas Level (%)",
             data: [],
             backgroundColor: "rgba(0, 0, 255, 0.2)",
             borderColor: "rgba(0, 0, 255, 1)",
             borderWidth: 1,
-            yAxisID: "gas_concentration",
+            yAxisID: "gas_level",
         },]
     }, options: {
         scales: {
             temperature: {
                 type: "linear", position: "left", display: true,
-            }, gas_concentration: {
+            }, gas_level: {
                 type: "linear", position: "right", display: true, grid: {
                     display: false,
                 }
@@ -41,16 +41,16 @@ async function updateChart() {
     let data = await response.json()
     let timestamps = data["timestamps"];
     let temperatureValues = data["temperature_values"]
-    let gasConcentrationValues = data["gas_concentration_values"];
+    let gasLevelValues = data["gas_level_values"];
     let numToShow = Math.max(0, document.getElementById("datapoint-count").value);
     if (numToShow > 0) {
         chart.data.labels = timestamps.slice(Math.max(0, timestamps.length - numToShow))
         chart.data.datasets[0].data = temperatureValues.slice(Math.max(0, temperatureValues.length - numToShow));
-        chart.data.datasets[1].data = gasConcentrationValues.slice(Math.max(0, gasConcentrationValues.length - numToShow));
+        chart.data.datasets[1].data = gasLevelValues.slice(Math.max(0, gasLevelValues.length - numToShow));
     } else {
         chart.data.labels = timestamps
         chart.data.datasets[0].data = temperatureValues
-        chart.data.datasets[1].data = gasConcentrationValues
+        chart.data.datasets[1].data = gasLevelValues
     }
     if (data["timestamps"].length === 0) {
         document.getElementById("avg_temp").innerText = "__";
@@ -61,11 +61,11 @@ async function updateChart() {
         document.getElementById("min_hum").innerText = "__";
     } else {
         document.getElementById("avg_temp").innerText = (data["temperature_values"].reduce((a, b) => a + b, 0) / data["temperature_values"].length).toFixed(2);
-        document.getElementById("avg_hum").innerText = (data["gas_concentration_values"].reduce((a, b) => a + b, 0) / data["gas_concentration_values"].length).toFixed(2);
+        document.getElementById("avg_hum").innerText = (data["gas_level_values"].reduce((a, b) => a + b, 0) / data["gas_level_values"].length).toFixed(2);
         document.getElementById("max_temp").innerText = (Math.max(...data["temperature_values"])).toFixed(2);
         document.getElementById("min_temp").innerText = (Math.min(...data["temperature_values"])).toFixed(2);
-        document.getElementById("max_hum").innerText = (Math.max(...data["gas_concentration_values"])).toFixed(2);
-        document.getElementById("min_hum").innerText = (Math.min(...data["gas_concentration_values"])).toFixed(2);
+        document.getElementById("max_hum").innerText = (Math.max(...data["gas_level_values"])).toFixed(2);
+        document.getElementById("min_hum").innerText = (Math.min(...data["gas_level_values"])).toFixed(2);
     }
     chart.update();
 

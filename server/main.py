@@ -10,10 +10,10 @@ log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
 Temperature = float
-GasConcentration = float
+GasLevel = float
 
 app = Flask(__name__)
-data: List[Tuple[date, Temperature, GasConcentration]] = []
+data: List[Tuple[date, Temperature, GasLevel]] = []
 date_formatter = "%m/%d %H:%M:%S"  # previously "%H:%M:%S"
 
 
@@ -26,14 +26,14 @@ def portal():
 def update():
     try:
         new_temperature = float(request.args["temperature"])
-        new_gas_concentration = float(request.args["gas_concentration"])
+        new_gas_level = float(request.args["gas_level"])
     except ValueError:
         return "Invalid input, expected float", 400
     d = datetime.now()
-    data.append((d, new_temperature, new_gas_concentration))
-    print(f"Updated temperature = {new_temperature} and gas concentration = {new_gas_concentration} at"
+    data.append((d, new_temperature, new_gas_level))
+    print(f"Updated temperature = {new_temperature} and gas level = {new_gas_level} at"
           f" {d.strftime(date_formatter)}")
-    return (f"Set temperature = {new_temperature}, gas concentration = {new_gas_concentration} at"
+    return (f"Set temperature = {new_temperature}, gas level = {new_gas_level} at"
             f" {d.strftime(date_formatter)}"), 200
 
 
@@ -42,7 +42,7 @@ def retrieve():
     return {
         "timestamps": [d.strftime(date_formatter) for d, _, _ in data],
         "temperature_values": [temp for _, temp, _ in data],
-        "gas_concentration_values": [hum for _, _, hum in data],
+        "gas_level_values": [hum for _, _, hum in data],
     }, 200
 
 
@@ -63,7 +63,7 @@ def main():
     # Print instructions
     print(f"Endpoints:")
     print(f"    1. http://{host}:{port}/")
-    print(f"    2. http://{host}:{port}/update?temperature=0&gas_concentration=0")
+    print(f"    2. http://{host}:{port}/update?temperature=0&gas_level=0")
     print(f"    3. http://{host}:{port}/retrieve")
     print(f"    4. http://{host}:{port}/clear")
 
