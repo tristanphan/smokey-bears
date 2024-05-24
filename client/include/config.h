@@ -8,6 +8,8 @@ static const char *PATH = "/update?temperature=%.4f&gas_level=%.4f";
 static const int NETWORK_TIMEOUT = 30 * 1000;
 static const int NETWORK_DELAY = 1000;
 
+static const int DISPLAY_TEXT_PADDING = 10;
+
 // Sensors
 static const int MQ2_PIN = 32;
 // The DHT20 temperature sensor uses I2C
