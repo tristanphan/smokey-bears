@@ -1,4 +1,4 @@
-#include "sensors/temperature_sensor.h"
+#include "sensors/temperature.h"
 
 void TemperatureSensor::initialize() {
     Wire.begin();
@@ -36,6 +36,11 @@ bool TemperatureSensor::read() {
 }
 
 float TemperatureSensor::get_temperature() {
+    while (!read()) {
+        Serial.printf("Failed to read temperature_sensor data\n");
+        delay(1000);
+    }
+
     float temperature = this->dht.getTemperature();
     Serial.printf("[TEMPERATURE SENSOR] Temperature: %.2f\n", temperature);
     return temperature;

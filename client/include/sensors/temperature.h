@@ -9,12 +9,12 @@ public:
 
     void initialize();
 
-    bool read();
-
     float get_temperature();
 
 private:
     DHT20 dht;
+
+    bool read();
 };
 
 

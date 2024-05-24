@@ -4,10 +4,14 @@
 
 #include "wifi_manager.h"
 #include "config.h"
-#include "sensors/temperature_sensor.h"
+#include "sensors/temperature.h"
+#include "sensors/gas.h"
 
 WiFiManager wifi{};
+
+// Sensors
 TemperatureSensor temperature_sensor{};
+GasSensor gas_sensor{};
 
 
 void setup() {
@@ -18,19 +22,15 @@ void setup() {
     String password;
     WiFiManager::retrieve_credentials(&ssid, &password);
     WiFiManager::connect(ssid, password);
+
+    // Initialize sensors
     temperature_sensor.initialize();
+    gas_sensor.initialize();
 }
 
 void loop() {
-    bool temperature_success = temperature_sensor.read();
-    if (!temperature_success) {
-        Serial.printf("Failed to read temperature_sensor data\n");
-        delay(1000);
-        return;
-    }
-
     float temperature = temperature_sensor.get_temperature();
-    float humidity = 0; // TODO Change to gas temperature_sensor
+    int humidity = gas_sensor.get_gas_level();
     char path[50];
     sprintf(path, PATH, temperature, humidity);
     String body = wifi.get(HOSTNAME, PORT, path);
