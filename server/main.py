@@ -14,7 +14,9 @@ GasLevel = float
 
 app = Flask(__name__)
 data: List[Tuple[date, Temperature, GasLevel]] = []
-date_formatter = "%m/%d %H:%M:%S"  # previously "%H:%M:%S"
+date_formatter = "%m/%d %H:%M:%S"
+
+alarm_status = False
 
 
 @app.route("/")
@@ -27,22 +29,31 @@ def update():
     try:
         new_temperature = float(request.args["temperature"])
         new_gas_level = float(request.args["gas_level"])
-    except ValueError:
-        return "Invalid input, expected float", 400
+    except (ValueError, KeyError):
+        return {
+            "message": "Invalid input, expected float",
+        }, 400
     d = datetime.now()
     data.append((d, new_temperature, new_gas_level))
     print(f"Updated temperature = {new_temperature} and gas level = {new_gas_level} at"
           f" {d.strftime(date_formatter)}")
-    return (f"Set temperature = {new_temperature}, gas level = {new_gas_level} at"
-            f" {d.strftime(date_formatter)}"), 200
+    return {
+        "message": (f"Set temperature = {new_temperature}, gas level = {new_gas_level} at"
+                    f" {d.strftime(date_formatter)}"),
+        "current_temperature": new_temperature,
+        "current_gas_level": new_gas_level,
+        "alarm_status": alarm_status
+    }, 200
 
 
 @app.route("/retrieve", methods=["GET"])
 def retrieve():
     return {
+        "message": "Success",
         "timestamps": [d.strftime(date_formatter) for d, _, _ in data],
         "temperature_values": [temp for _, temp, _ in data],
         "gas_level_values": [hum for _, _, hum in data],
+        "alarm_status": alarm_status,
     }, 200
 
 
@@ -50,7 +61,30 @@ def retrieve():
 def clear():
     data.clear()
     print("Cleared all data")
-    return "Cleared all data", 200
+    return {
+        "message": "Cleared all data",
+    }, 200
+
+
+@app.route("/set_alarm", methods=["GET"])
+def set_alarm():
+    global alarm_status
+    try:
+        if request.args["status"].lower() == "on":
+            alarm_status = True
+        elif request.args["status"].lower() == "off":
+            alarm_status = False
+        else:
+            raise KeyError
+    except KeyError:
+        return {
+            "message": "Invalid input, expected 'on' or 'off'",
+        }, 400
+
+    print("Set alarm status to", "on" if alarm_status else "off")
+    return {
+        "message": "Set alarm status to " + ("on" if alarm_status else "off"),
+    }, 200
 
 
 # noinspection HttpUrlsUsage
@@ -66,6 +100,7 @@ def main():
     print(f"    2. http://{host}:{port}/update?temperature=0&gas_level=0")
     print(f"    3. http://{host}:{port}/retrieve")
     print(f"    4. http://{host}:{port}/clear")
+    print(f"    5. http://{host}:{port}/set_alarm?status=on")
 
     waitress.serve(
         app,
