@@ -22,21 +22,31 @@
             <canvas id="weather-chart"></canvas>
         </div>
 
+        <h1 id="alarm-text" hidden>🚨 ALARM IS ON!!!</h1>
+
         <p><b>Temperature Statistics:</b> <span id="avg_temp"></span> avg / <span id="min_temp"></span> min / <span
                 id="max_temp"></span> max</p>
         <p><b>Gas Level Statistics: </b> <span id="avg_hum"></span> avg / <span id="min_hum"></span> min / <span
                 id="max_hum"></span> max</p>
 
         <div id="footer">
-            <label>
-                Showing
-                <input type="number" id="datapoint-count" value="20"/>
-                latest datapoints (0 to show all)
-            </label>
-            <p>Last refresh at <span id="last_refresh_time"></span></p>
+            <div>
+                <label>
+                    Showing
+                    <input type="number" id="datapoint-count" value="20"/>
+                    latest datapoints (0 to show all)
+                </label>
+                <p>Last refresh at <span id="last_refresh_time"></span></p>
+            </div>
+            <div id="button-column">
+                <button onclick="clearHistory()" id="clear-button">Clear History</button>
+                <div style="height: 5px"></div>
+                <button onclick="turnOnAlarm()" id="alarm-on-button">Turn On Alarm</button>
+                <button onclick="turnOffAlarm()" id="alarm-off-button" hidden>Turn Off Alarm</button>
+                <div style="height: 5px"></div>
+            </div>
         </div>
 
-        <button onclick="clearHistory()" id="clear-button">Clear History</button>
 
         <script src="{{ url_for('static', filename='script.js') }}"></script>
     </body>

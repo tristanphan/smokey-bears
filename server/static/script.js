@@ -36,12 +36,31 @@ async function clearHistory() {
     }
 }
 
+async function turnOffAlarm() {
+    if (confirm("Are you sure you want to deactivate the alarm?")) {
+        await fetch("/set_alarm?status=off")
+        await updateChart()
+    }
+}
+
+async function turnOnAlarm() {
+    if (confirm("Are you sure you want to activate the alarm?")) {
+        await fetch("/set_alarm?status=on")
+        await updateChart()
+    }
+}
+
 async function updateChart() {
     let response = await fetch("/retrieve")
     let data = await response.json()
+
+    // Extract request
     let timestamps = data["timestamps"];
     let temperatureValues = data["temperature_values"]
     let gasLevelValues = data["gas_level_values"];
+    let alarmStatus = data["alarm_status"];
+
+    // Set chart datapoints
     let numToShow = Math.max(0, document.getElementById("datapoint-count").value);
     if (numToShow > 0) {
         chart.data.labels = timestamps.slice(Math.max(0, timestamps.length - numToShow))
@@ -52,6 +71,8 @@ async function updateChart() {
         chart.data.datasets[0].data = temperatureValues
         chart.data.datasets[1].data = gasLevelValues
     }
+
+    // Set statistics
     if (data["timestamps"].length === 0) {
         document.getElementById("avg_temp").innerText = "__";
         document.getElementById("avg_hum").innerText = "__";
@@ -69,8 +90,20 @@ async function updateChart() {
     }
     chart.update();
 
+    // Set refresh date
     let now = new Date()
     document.getElementById("last_refresh_time").innerText = now.toLocaleDateString() + ", " + now.toLocaleTimeString()
+
+    // Set alarm buttons
+    if (alarmStatus) {
+        document.getElementById("alarm-on-button").hidden = true
+        document.getElementById("alarm-off-button").hidden = false
+        document.getElementById("alarm-text").hidden = false
+    } else {
+        document.getElementById("alarm-on-button").hidden = false
+        document.getElementById("alarm-off-button").hidden = true
+        document.getElementById("alarm-text").hidden = true
+    }
 }
 
 void updateChart()

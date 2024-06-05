@@ -23,10 +23,31 @@ p {
 
 #clear-button {
     background-color: rgb(255, 192, 203, 0.8);
-    border: 1px solid black;
+    border: 1px solid rgb(255, 182, 193);
     border-radius: 24px;
     padding: 6px 12px;
     color: black;
+    width: fit-content;
+    height: fit-content;
+}
+
+#alarm-on-button {
+    background-color: rgb(255, 0, 0);
+    border: 1px solid red;;
+    border-radius: 24px;
+    padding: 6px 12px;
+    color: white;
+    width: fit-content;
+    height: fit-content;
+}
+
+#alarm-off-button {
+    background-color: orange;
+    border: 1px solid darkorange;
+    border-radius: 24px;
+    padding: 6px 12px;
+    width: fit-content;
+    height: fit-content;
 }
 
 #datapoint-count {
@@ -61,5 +82,29 @@ p {
 
 #footer {
     position: fixed;
+    display: flex;
+    align-items: flex-end;
     bottom: 0;
+    left: 40px;
+    width: 500px;
+    justify-content: space-between;
+}
+
+#button-column {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+#alarm-text {
+    animation: alarm-pulse 500ms infinite;
+}
+
+@keyframes alarm-pulse {
+    0%, 100% {
+        color: #000000;
+    }
+    50% {
+        color: #FF0000;
+    }
 }
