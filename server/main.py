@@ -16,12 +16,20 @@ app = Flask(__name__)
 data: List[Tuple[date, Temperature, GasLevel]] = []
 date_formatter = "%m/%d %H:%M:%S"
 
+# Alarm mechanism is explained in [update_alarm_status_flags
 alarm_status = False
+manual_off = False
+temperature_threshold = 40
+gas_level_threshold = 70
 
 
 @app.route("/")
 def portal():
-    return render_template("index.html")
+    return render_template(
+        "index.html",
+        default_temperature_threshold=temperature_threshold,
+        default_gas_level_threshold=gas_level_threshold,
+    )
 
 
 @app.route("/update", methods=["GET"])
@@ -35,6 +43,7 @@ def update():
         }, 400
     d = datetime.now()
     data.append((d, new_temperature, new_gas_level))
+    update_alarm_status_flags()
     print(f"Updated temperature = {new_temperature} and gas level = {new_gas_level} at"
           f" {d.strftime(date_formatter)}")
     return {
@@ -42,7 +51,7 @@ def update():
                     f" {d.strftime(date_formatter)}"),
         "current_temperature": new_temperature,
         "current_gas_level": new_gas_level,
-        "alarm_status": alarm_status
+        "alarm_status": alarm_status,
     }, 200
 
 
@@ -68,23 +77,81 @@ def clear():
 
 @app.route("/set_alarm", methods=["GET"])
 def set_alarm():
-    global alarm_status
-    try:
-        if request.args["status"].lower() == "on":
-            alarm_status = True
-        elif request.args["status"].lower() == "off":
-            alarm_status = False
-        else:
-            raise KeyError
-    except KeyError:
+    global alarm_status, manual_off
+
+    if ("status" not in request.args) or (request.args["status"].lower() not in ["on", "off"]):
         return {
             "message": "Invalid input, expected 'on' or 'off'",
         }, 400
+    if request.args["status"].lower() == "on":
+        alarm_status = True
+    elif request.args["status"].lower() == "off":
+        alarm_status = False
+        manual_off = True
+        print("Manual override off enabled")
+        update_alarm_status_flags()  # Can immediately unset [manual_off] if values are below threshold
 
     print("Set alarm status to", "on" if alarm_status else "off")
     return {
         "message": "Set alarm status to " + ("on" if alarm_status else "off"),
     }, 200
+
+
+@app.route("/set_thresholds", methods=["GET"])
+def set_thresholds():
+    global temperature_threshold, gas_level_threshold
+    if "temperature" not in request.args and "gas_level" not in request.args:
+        return {
+            "message": "Invalid input, expected 'temperature' or 'gas_level'",
+        }, 400
+
+    try:
+        if "temperature" in request.args:
+            temperature_threshold = float(request.args["temperature"])
+        if "gas_level" in request.args:
+            gas_level_threshold = float(request.args["gas_level"])
+    except (ValueError, KeyError):
+        return {
+            "message": "Invalid input, expected float",
+        }, 400
+
+    print(f"Set temperature threshold to {temperature_threshold} and gas level threshold to {gas_level_threshold}")
+    return {
+        "message": f"Set temperature threshold to {temperature_threshold} and "
+                   f"gas level threshold to {gas_level_threshold}",
+    }, 200
+
+
+def update_alarm_status_flags():
+    # NOTE
+    # The idea behind the alarm is that once the alarm is tripped (either threshold or manually),
+    # it will stay on. If the alarm is manually turned off, it will reset if the values are now
+    # below the threshold. If the alarm was turned off while the values were above the threshold,
+    # [manual_off] will be set, so the alarm will stay off until the value dips below thresholds
+    # and then goes above again.
+
+    global alarm_status, manual_off
+
+    # Get ideal alarm status
+    new_alarm_status = False
+    if len(data) > 0:
+        _, temp, hum = data[-1]
+        new_alarm_status = temp > temperature_threshold or hum > gas_level_threshold
+
+    if new_alarm_status:
+        # We are above threshold
+        if manual_off:
+            pass  # Ignore, since the user has already turned off the alarm
+        else:
+            alarm_status = True
+    else:
+        # We are above threshold
+        if manual_off:
+            manual_off = False
+            print("Manual override off disabled")
+            alarm_status = False
+        else:
+            pass  # Keep alarm on if it was on
 
 
 # noinspection HttpUrlsUsage
@@ -101,6 +168,7 @@ def main():
     print(f"    3. http://{host}:{port}/retrieve")
     print(f"    4. http://{host}:{port}/clear")
     print(f"    5. http://{host}:{port}/set_alarm?status=on")
+    print(f"    6. http://{host}:{port}/set_thresholds?temperature=30&gas_level=70")
 
     waitress.serve(
         app,

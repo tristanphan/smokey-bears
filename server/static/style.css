@@ -39,6 +39,7 @@ p {
     color: white;
     width: fit-content;
     height: fit-content;
+    margin-top: 5px;
 }
 
 #alarm-off-button {
@@ -48,9 +49,10 @@ p {
     padding: 6px 12px;
     width: fit-content;
     height: fit-content;
+    margin-top: 5px;
 }
 
-#datapoint-count {
+.number-field {
     width: 50px;
     text-align: center;
     -moz-appearance: textfield;
@@ -60,8 +62,8 @@ p {
 }
 
 /* Number input arrows */
-#datapoint-count::-webkit-outer-spin-button,
-#datapoint-count::-webkit-inner-spin-button {
+.number-field::-webkit-outer-spin-button,
+.number-field::-webkit-inner-spin-button {
     -webkit-appearance: none;
 }
 

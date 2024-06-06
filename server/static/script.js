@@ -50,6 +50,14 @@ async function turnOnAlarm() {
     }
 }
 
+async function setTemperatureThreshold(newTemperatureThreshold) {
+    await fetch(`/set_thresholds?temperature=${newTemperatureThreshold}`)
+}
+
+async function setGasLevelThreshold(newGasLevelThreshold) {
+    await fetch(`/set_thresholds?gas_level=${newGasLevelThreshold}`)
+}
+
 async function updateChart() {
     let response = await fetch("/retrieve")
     let data = await response.json()
@@ -95,15 +103,9 @@ async function updateChart() {
     document.getElementById("last_refresh_time").innerText = now.toLocaleDateString() + ", " + now.toLocaleTimeString()
 
     // Set alarm buttons
-    if (alarmStatus) {
-        document.getElementById("alarm-on-button").hidden = true
-        document.getElementById("alarm-off-button").hidden = false
-        document.getElementById("alarm-text").hidden = false
-    } else {
-        document.getElementById("alarm-on-button").hidden = false
-        document.getElementById("alarm-off-button").hidden = true
-        document.getElementById("alarm-text").hidden = true
-    }
+    document.getElementById("alarm-on-button").hidden = alarmStatus
+    document.getElementById("alarm-off-button").hidden = !alarmStatus
+    document.getElementById("alarm-text").hidden = !alarmStatus
 }
 
 void updateChart()
@@ -115,3 +117,16 @@ window.addEventListener("resize", () => {
     chart.resize();
 });
 
+document.getElementById("temperature-threshold").addEventListener("keydown", async (event) => {
+    let value = document.getElementById("temperature-threshold").value
+    if (event.key === "Enter" && value.length > 0) {
+        await setTemperatureThreshold(value)
+    }
+})
+
+document.getElementById("gas-level-threshold").addEventListener("keydown", async (event) => {
+    let value = document.getElementById("gas-level-threshold").value
+    if (event.key === "Enter" && value.length > 0) {
+        await setGasLevelThreshold(value)
+    }
+})
