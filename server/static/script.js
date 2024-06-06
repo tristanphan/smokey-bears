@@ -17,6 +17,9 @@ const chart = new Chart(ctx, {
             yAxisID: "gas_level",
         },]
     }, options: {
+        animation: {
+            duration: 0,
+        },
         scales: {
             temperature: {
                 type: "linear", position: "left", display: true,
@@ -58,6 +61,60 @@ async function setGasLevelThreshold(newGasLevelThreshold) {
     await fetch(`/set_thresholds?gas_level=${newGasLevelThreshold}`)
 }
 
+function _updateChartDatapoints(numToShow, timestamps, temperatureValues, gasLevelValues) {
+    if (numToShow > 0) {
+        chart.data.labels = timestamps.slice(Math.max(0, timestamps.length - numToShow))
+        chart.data.datasets[0].data = temperatureValues.slice(Math.max(0, temperatureValues.length - numToShow));
+        chart.data.datasets[1].data = gasLevelValues.slice(Math.max(0, gasLevelValues.length - numToShow));
+    } else {
+        chart.data.labels = timestamps
+        chart.data.datasets[0].data = temperatureValues
+        chart.data.datasets[1].data = gasLevelValues
+    }
+}
+
+function _updateChartRange(numToShow, temperatureValues, gasLevelValues) {
+    let tempDatapointsConsidered = temperatureValues.slice(Math.max(0, temperatureValues.length - numToShow))
+    let tempLowRange = Math.min(...tempDatapointsConsidered) - 0.2;
+    let tempHighRange = Math.max(...tempDatapointsConsidered) + 0.2;
+    if (tempHighRange - tempLowRange < 1) {
+        let remaining = 1 - (tempHighRange - tempLowRange)
+        tempHighRange += remaining / 2
+        tempLowRange -= remaining / 2
+    }
+    chart.options.scales.temperature.min = tempLowRange
+    chart.options.scales.temperature.max = tempHighRange
+
+    let gasDatapointsConsidered = gasLevelValues.slice(Math.max(0, temperatureValues.length - numToShow))
+    let gasLowRange = Math.min(...gasDatapointsConsidered) - 0.5;
+    let gasHighRange = Math.max(...gasDatapointsConsidered) + 0.5;
+    if (gasHighRange - gasLowRange < 8) {
+        let remaining = 8 - (gasHighRange - gasLowRange)
+        gasHighRange += remaining / 2
+        gasLowRange -= remaining / 2
+    }
+    chart.options.scales.gas_level.min = gasLowRange
+    chart.options.scales.gas_level.max = gasHighRange
+}
+
+function _updateStatistics(timestamps, temperatureValues, gasLevelValues) {
+    if (timestamps.length === 0) {
+        document.getElementById("avg_temp").innerText = "__";
+        document.getElementById("avg_gas").innerText = "__";
+        document.getElementById("max_temp").innerText = "__";
+        document.getElementById("min_temp").innerText = "__";
+        document.getElementById("max_gas").innerText = "__";
+        document.getElementById("min_gas").innerText = "__";
+    } else {
+        document.getElementById("avg_temp").innerText = (temperatureValues.reduce((a, b) => a + b, 0) / temperatureValues.length).toFixed(2);
+        document.getElementById("avg_gas").innerText = (gasLevelValues.reduce((a, b) => a + b, 0) / gasLevelValues.length).toFixed(2);
+        document.getElementById("max_temp").innerText = (Math.max(...temperatureValues)).toFixed(2);
+        document.getElementById("min_temp").innerText = (Math.min(...temperatureValues)).toFixed(2);
+        document.getElementById("max_gas").innerText = (Math.max(...gasLevelValues)).toFixed(2);
+        document.getElementById("min_gas").innerText = (Math.min(...gasLevelValues)).toFixed(2);
+    }
+}
+
 async function updateChart() {
     let response = await fetch("/retrieve")
     let data = await response.json()
@@ -68,34 +125,12 @@ async function updateChart() {
     let gasLevelValues = data["gas_level_values"];
     let alarmStatus = data["alarm_status"];
 
-    // Set chart datapoints
-    let numToShow = Math.max(0, document.getElementById("datapoint-count").value);
-    if (numToShow > 0) {
-        chart.data.labels = timestamps.slice(Math.max(0, timestamps.length - numToShow))
-        chart.data.datasets[0].data = temperatureValues.slice(Math.max(0, temperatureValues.length - numToShow));
-        chart.data.datasets[1].data = gasLevelValues.slice(Math.max(0, gasLevelValues.length - numToShow));
-    } else {
-        chart.data.labels = timestamps
-        chart.data.datasets[0].data = temperatureValues
-        chart.data.datasets[1].data = gasLevelValues
-    }
 
-    // Set statistics
-    if (data["timestamps"].length === 0) {
-        document.getElementById("avg_temp").innerText = "__";
-        document.getElementById("avg_hum").innerText = "__";
-        document.getElementById("max_temp").innerText = "__";
-        document.getElementById("min_temp").innerText = "__";
-        document.getElementById("max_hum").innerText = "__";
-        document.getElementById("min_hum").innerText = "__";
-    } else {
-        document.getElementById("avg_temp").innerText = (data["temperature_values"].reduce((a, b) => a + b, 0) / data["temperature_values"].length).toFixed(2);
-        document.getElementById("avg_hum").innerText = (data["gas_level_values"].reduce((a, b) => a + b, 0) / data["gas_level_values"].length).toFixed(2);
-        document.getElementById("max_temp").innerText = (Math.max(...data["temperature_values"])).toFixed(2);
-        document.getElementById("min_temp").innerText = (Math.min(...data["temperature_values"])).toFixed(2);
-        document.getElementById("max_hum").innerText = (Math.max(...data["gas_level_values"])).toFixed(2);
-        document.getElementById("min_hum").innerText = (Math.min(...data["gas_level_values"])).toFixed(2);
-    }
+    let numToShow = Math.max(0, document.getElementById("datapoint-count").value);
+    _updateChartDatapoints(numToShow, timestamps, temperatureValues, gasLevelValues)
+    _updateChartRange(numToShow, temperatureValues, gasLevelValues)
+    _updateStatistics(timestamps, temperatureValues, gasLevelValues)
+
     chart.update();
 
     // Set refresh date
