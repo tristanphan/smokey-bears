@@ -11,9 +11,6 @@ public:
     void initialize();
 
     bool is_pressed();
-
-private:
-    bool pressed;
 };
 
 

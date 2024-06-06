@@ -9,8 +9,10 @@
 #include "sensors/temperature.h"
 #include "sensors/gas.h"
 #include "sensors/test_button.h"
+#include "actuators/buzzer.h"
 
 bool alarm_status = false;
+unsigned long last_refresh_time = 0;
 
 WiFiManager wifi{};
 Display display{};
@@ -19,6 +21,9 @@ Display display{};
 TemperatureSensor temperature_sensor{};
 GasSensor gas_sensor{};
 TestButton test_button{};
+
+// Actuators
+Buzzer buzzer{};
 
 
 void setup() {
@@ -37,12 +42,29 @@ void setup() {
     temperature_sensor.initialize();
     gas_sensor.initialize();
     test_button.initialize();
+
+    // Initialize actuators
+    buzzer.initialize();
+
+    Serial.printf("Done initializing");
 }
 
-void loop() {
+void refresh_sensors_and_server_status() {
+    // Reads from sensors, sends data to the server, receives data, and sets the alarm
+    if (millis() - last_refresh_time < REFRESH_INTERVAL) return;
+    last_refresh_time = millis();
+
     // Get readings
     float temperature = temperature_sensor.get_temperature();
     float gas_level = gas_sensor.get_gas_level();
+
+    // Update display
+    String lines[] = {
+            String("Temp: ") + temperature + " C",
+            String("Gas Lvl: ") + gas_level + "%",
+            String("Alarm: ") + ((alarm_status) ? "on" : "off"),
+    };
+    display.update(lines, 3, false);
 
     // Send readings to server
     char update_path[50];
@@ -51,7 +73,7 @@ void loop() {
     Serial.printf("Response: %s\n", update_response_body.c_str());
     wifi.stop();
 
-    // Extract alarm status
+    // Extract new alarm status
     bool previous_alarm_status = alarm_status;
     JsonDocument document;
     deserializeJson(document, update_response_body);
@@ -62,7 +84,12 @@ void loop() {
     // Change actuator status if alarm status changed
     if (alarm_status != previous_alarm_status) {
         // Change actuator status (TODO)
+        buzzer.set_alarm(alarm_status);
     }
+}
+
+void loop() {
+    refresh_sensors_and_server_status();
 
     // Check test button
     if (test_button.is_pressed()) {
@@ -73,12 +100,5 @@ void loop() {
         wifi.stop();
     }
 
-    String lines[] = {
-            String("Temp: ") + temperature + " C",
-            String("Gas Lvl: ") + gas_level + "%",
-            String("Alarm: ") + "off",
-    };
-    display.update(lines, 3, false);
-
-    delay(200);
+    buzzer.tick();
 }
