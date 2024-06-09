@@ -20,5 +20,6 @@ static const int MQ2_PIN = 32;
 // The DHT20 temperature sensor uses I2C
 static const int TEST_BUTTON_PIN = 33;
 static const int BUZZER_PIN = 15;
+static const int VALVE_PIN = 27;
 
 #endif //CS147_CONFIG_H

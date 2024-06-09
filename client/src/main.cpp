@@ -10,6 +10,7 @@
 #include "sensors/gas.h"
 #include "sensors/test_button.h"
 #include "actuators/buzzer.h"
+#include "actuators/valve.h"
 
 bool alarm_status = false;
 unsigned long last_refresh_time = 0;
@@ -24,6 +25,7 @@ TestButton test_button{};
 
 // Actuators
 Buzzer buzzer{};
+Valve valve{};
 
 
 void setup() {
@@ -45,6 +47,7 @@ void setup() {
 
     // Initialize actuators
     buzzer.initialize();
+    valve.initialize();
 
     Serial.printf("Done initializing");
 }
@@ -83,8 +86,8 @@ void refresh_sensors_and_server_status() {
 
     // Change actuator status if alarm status changed
     if (alarm_status != previous_alarm_status) {
-        // Change actuator status (TODO)
         buzzer.set_alarm(alarm_status);
+        valve.set_alarm(alarm_status);
     }
 }
 
@@ -98,6 +101,9 @@ void loop() {
         String set_alarm_response_body = wifi.get(HOSTNAME, PORT, set_alarm_path);
         Serial.printf("Response: %s\n", set_alarm_response_body.c_str());
         wifi.stop();
+
+        // Force a refresh
+        last_refresh_time = 0;
     }
 
     buzzer.tick();

@@ -9,10 +9,10 @@ void interrupt_handler() {
 void TestButton::initialize() {
     pinMode(TEST_BUTTON_PIN, INPUT_PULLUP);
     if (digitalPinToInterrupt(TEST_BUTTON_PIN) == -1) {
-        Serial.printf("[Test Button] Pin cannot be used as interrupt");
+        Serial.printf("[Test Button] Pin cannot be used as interrupt\n");
         while (true);
     } else {
-        Serial.printf("[Test Button] Pin successfully set as interrupt");
+        Serial.printf("[Test Button] Pin successfully set as interrupt\n");
         attachInterrupt(digitalPinToInterrupt(TEST_BUTTON_PIN), interrupt_handler, RISING);
     }
 }

@@ -75,7 +75,7 @@ String WiFiManager::get(const String &hostname, int port, const String &path) {
     }
 
     // Parse the response code
-    Serial.printf("Making request to %s at %s\n", hostname.c_str(), path.c_str());
+    Serial.printf("[WIFI MODULE] Making request to %s at %s\n", hostname.c_str(), path.c_str());
     int status_code = http_client.responseStatusCode();
     if (status_code < 0) {
         Serial.printf("[HTTP CLIENT ERROR] Getting response failed: %d\n", status_code);
