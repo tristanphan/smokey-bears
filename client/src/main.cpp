@@ -33,7 +33,7 @@ void setup() {
     delay(1000);
 
     display.initialize();
-    display.update(new String[2]{"Initializing...", "Please wait"}, 2, false);
+    display.update(new String[2]{"Initializing...", "Please wait"}, 2, TFT_BLACK);
 
     String ssid;
     String password;
@@ -67,7 +67,7 @@ void refresh_sensors_and_server_status() {
             String("Gas Lvl: ") + gas_level + "%",
             String("Alarm: ") + ((alarm_status) ? "on" : "off"),
     };
-    display.update(lines, 3, false);
+    display.update(lines, 3, (alarm_status) ? TFT_RED : TFT_BLACK);
 
     // Send readings to server
     char update_path[50];
@@ -96,8 +96,16 @@ void loop() {
 
     // Check test button
     if (test_button.is_pressed()) {
+
+        // Prematurely set alarm status to avoid waiting for the next refresh
+        alarm_status = !alarm_status;
+        buzzer.set_alarm(alarm_status);
+        valve.set_alarm(alarm_status);
+        display.update_line(String("Alarm: ") + ((alarm_status) ? "on*" : "off*"), 2,
+                            (alarm_status) ? TFT_RED : TFT_BLACK);
+
         char set_alarm_path[50];
-        sprintf(set_alarm_path, SET_ALARM_PATH, alarm_status ? "off" : "on");
+        sprintf(set_alarm_path, SET_ALARM_PATH, alarm_status ? "on" : "off");
         String set_alarm_response_body = wifi.get(HOSTNAME, PORT, set_alarm_path);
         Serial.printf("Response: %s\n", set_alarm_response_body.c_str());
         wifi.stop();
@@ -105,6 +113,4 @@ void loop() {
         // Force a refresh
         last_refresh_time = 0;
     }
-
-    buzzer.tick();
 }

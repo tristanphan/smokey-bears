@@ -12,26 +12,22 @@ void Display::initialize() {
     tft.setTextDatum(MC_DATUM); // Middle Center Datum
 }
 
-void Display::update(String *lines, int num_lines, bool alarm_status) {
-    if (is_lines_equal(lines, num_lines) && alarm_status == current_alarm_status) return;
+void Display::update(String *lines, int num_lines, uint16_t background_color) {
+    if (is_lines_equal(lines, num_lines) && background_color == current_background_color) return;
     set_current_text(lines, num_lines);
+    current_background_color = background_color;
+    draw_lines();
+}
 
-    if (alarm_status) tft.fillScreen(TFT_RED);
-    else tft.fillScreen(TFT_BLACK);
-
-    int line_height = tft.fontHeight();
-    int space_between_midpoints = line_height + DISPLAY_TEXT_PADDING;
-    int space_between_first_last_midpoints = space_between_midpoints * (num_lines - 1);
-    int height = tft.height() / 2 - space_between_first_last_midpoints / 2;
-    for (int i = 0; i < num_lines; i++) {
-        tft.drawString(lines[i], tft.width() / 2, height);
-        height += space_between_midpoints;
-    }
+void Display::update_line(const String &line, int line_num, uint16_t background_color) {
+    if (line_num >= current_num_lines || line_num < 0) return;
+    current_lines[line_num] = line;
+    current_background_color = background_color;
+    draw_lines();
 }
 
 void Display::set_current_text(String *lines, int num_lines) {
-    if (current_lines != NULL) delete[] current_lines;
-
+    delete[] current_lines;
     current_lines = new String[num_lines];
     current_num_lines = num_lines;
 
@@ -48,4 +44,18 @@ bool Display::is_lines_equal(String *lines, int num_lines) {
     }
 
     return true;
+}
+
+void Display::draw_lines() {
+    tft.fillScreen(current_background_color);
+    tft.setTextColor(TFT_WHITE, current_background_color);
+
+    int line_height = tft.fontHeight();
+    int space_between_midpoints = line_height + DISPLAY_TEXT_PADDING;
+    int space_between_first_last_midpoints = space_between_midpoints * (current_num_lines - 1);
+    int height = tft.height() / 2 - space_between_first_last_midpoints / 2;
+    for (int i = 0; i < current_num_lines; i++) {
+        tft.drawString(current_lines[i], tft.width() / 2, height);
+        height += space_between_midpoints;
+    }
 }

@@ -10,5 +10,5 @@ void Valve::initialize() {
 void Valve::set_alarm(bool alarm_status) {
     int angle = alarm_status ? 179 : 0;
     Serial.printf("[VALVE] Setting servo angle to %d\n", angle);
-//    servo.write(angle);
+    servo.write(angle);
 }

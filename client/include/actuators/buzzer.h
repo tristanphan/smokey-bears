@@ -8,14 +8,8 @@ public:
 
     void set_alarm(bool status);
 
-    void tick();
-
 private:
-    bool alarm_status;
-
-    // Only used when [alarm_status] is true
-    unsigned long last_change_time;
-    bool sound_currently_on;
+    TaskHandle_t* task = nullptr;
 };
 
 
