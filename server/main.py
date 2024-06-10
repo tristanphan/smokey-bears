@@ -1,7 +1,13 @@
+import csv
 import logging
+import os
+import re
+import smtplib
 import sys
 from datetime import datetime, date
-from typing import Tuple, List
+from email.message import EmailMessage
+from pathlib import Path
+from typing import Tuple, List, Optional
 
 import waitress
 from flask import Flask, render_template, request
@@ -15,12 +21,19 @@ GasLevel = float
 app = Flask(__name__)
 data: List[Tuple[date, Temperature, GasLevel]] = []
 date_formatter = "%m/%d %H:%M:%S"
+emails_path = Path("email_recipients.csv")
+email_regex = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b")
 
 # Alarm mechanism is explained in [update_alarm_status_flags
 alarm_status = False
 manual_off = False
 temperature_threshold = 40
 gas_level_threshold = 70
+email_recipients = []
+
+# Sender email
+sender_email = os.environ["EMAIL_USERNAME"]
+sender_password = os.environ["EMAIL_PASSWORD"]
 
 
 @app.route("/")
@@ -43,7 +56,7 @@ def update():
         }, 400
     d = datetime.now()
     data.append((d, new_temperature, new_gas_level))
-    update_alarm_status_flags()
+    update_alarm_status_flags_by_data()
     print(f"Updated temperature = {new_temperature} and gas level = {new_gas_level} at"
           f" {d.strftime(date_formatter)}")
     return {
@@ -84,12 +97,12 @@ def set_alarm():
             "message": "Invalid input, expected 'on' or 'off'",
         }, 400
     if request.args["status"].lower() == "on":
-        alarm_status = True
+        set_alarm_status(True, "Manually activated by user")
     elif request.args["status"].lower() == "off":
-        alarm_status = False
+        set_alarm_status(False)
         manual_off = True
         print("Manual override off enabled")
-        update_alarm_status_flags()  # Can immediately unset [manual_off] if values are below threshold
+        update_alarm_status_flags_by_data()  # Can immediately unset [manual_off] if values are below threshold
 
     print("Set alarm status to", "on" if alarm_status else "off")
     return {
@@ -122,7 +135,7 @@ def set_thresholds():
     }, 200
 
 
-def update_alarm_status_flags():
+def update_alarm_status_flags_by_data():
     # NOTE
     # The idea behind the alarm is that once the alarm is tripped (either threshold or manually),
     # it will stay on. If the alarm is manually turned off, it will reset if the values are now
@@ -143,15 +156,47 @@ def update_alarm_status_flags():
         if manual_off:
             pass  # Ignore, since the user has already turned off the alarm
         else:
-            alarm_status = True
+            set_alarm_status(True, f"Sensor exceeded threshold")
     else:
         # We are above threshold
         if manual_off:
             manual_off = False
             print("Manual override off disabled")
-            alarm_status = False
+            set_alarm_status(False)
         else:
             pass  # Keep alarm on if it was on
+
+
+def set_alarm_status(status: bool, cause: Optional[str] = None):
+    global alarm_status
+    alarm_status = status
+    if alarm_status:
+        send_email(cause)
+
+
+def send_email(cause: Optional[str] = None):
+    if len(email_recipients) == 0:
+        print("No email recipients to send to")
+        return
+
+    body = f"<b>Cause of alarm:</b> {cause if cause is not None else 'Unknown'}<br/>"
+    if len(data) > 0:
+        body += (f"<b>Latest temperature:</b> {data[-1][1]}ºC / {temperature_threshold}ºC<br/>"
+                 f"<b>Latest gas level</b>: {data[-1][2]}% / {gas_level_threshold}%<br/>")
+    else:
+        body += "<b>No sensor data available</b><br/>"
+    body += "<br/><br/><em>CS 147 Project</em>"
+
+    # Create message
+    msg = EmailMessage()
+    msg.set_content(body, subtype="html")
+    msg["Subject"] = "[Urgent] Smoke Detector Activated"
+    msg["From"] = sender_email
+    msg["To"] = ", ".join(email_recipients)
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+        smtp_server.login(sender_email, sender_password)
+        smtp_server.send_message(msg)
+    print("Email sent to " + ", ".join(email_recipients) + " with cause: " + (cause if cause is not None else "Unknown"))
 
 
 # noinspection HttpUrlsUsage
@@ -169,6 +214,19 @@ def main():
     print(f"    4. http://{host}:{port}/clear")
     print(f"    5. http://{host}:{port}/set_alarm?status=on")
     print(f"    6. http://{host}:{port}/set_thresholds?temperature=30&gas_level=70")
+
+    if not emails_path.exists():
+        emails_path.write_text("")
+
+    # Read email file
+    with emails_path.open("r") as file:
+        reader = csv.reader(file)
+        for row in reader:
+            if len(row) == 0:
+                continue
+            if email_regex.match(row[0]) is None:
+                raise ValueError("Invalid email: " + row[0])
+            email_recipients.append(row[0])
 
     waitress.serve(
         app,
