@@ -1,5 +1,5 @@
-#ifndef CS147_BUZZER_H
-#define CS147_BUZZER_H
+#ifndef SMOKEY_BUZZER_H
+#define SMOKEY_BUZZER_H
 
 
 class Buzzer {
@@ -13,4 +13,4 @@ private:
 };
 
 
-#endif //CS147_BUZZER_H
+#endif //SMOKEY_BUZZER_H

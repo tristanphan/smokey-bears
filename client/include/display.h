@@ -1,5 +1,5 @@
-#ifndef CS147_DISPLAY_H
-#define CS147_DISPLAY_H
+#ifndef SMOKEY_DISPLAY_H
+#define SMOKEY_DISPLAY_H
 
 #include "TFT_eSPI.h"
 #include <Arduino.h>
@@ -29,4 +29,4 @@ private:
 };
 
 
-#endif //CS147_DISPLAY_H
+#endif //SMOKEY_DISPLAY_H

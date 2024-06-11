@@ -1,5 +1,5 @@
-#ifndef CS147_CONFIG_H
-#define CS147_CONFIG_H
+#ifndef SMOKEY_CONFIG_H
+#define SMOKEY_CONFIG_H
 
 static const char *HOSTNAME = "MY_HOSTNAME";
 static const int PORT = 5000;
@@ -22,4 +22,4 @@ static const int TEST_BUTTON_PIN = 33;
 static const int BUZZER_PIN = 15;
 static const int VALVE_PIN = 27;
 
-#endif //CS147_CONFIG_H
+#endif //SMOKEY_CONFIG_H

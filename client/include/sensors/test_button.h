@@ -1,5 +1,5 @@
-#ifndef CS147_TEST_BUTTON_H
-#define CS147_TEST_BUTTON_H
+#ifndef SMOKEY_TEST_BUTTON_H
+#define SMOKEY_TEST_BUTTON_H
 
 #include "config.h"
 #include <Arduino.h>
@@ -14,4 +14,4 @@ public:
 };
 
 
-#endif //CS147_TEST_BUTTON_H
+#endif //SMOKEY_TEST_BUTTON_H

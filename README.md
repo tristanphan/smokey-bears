@@ -11,3 +11,26 @@ If you are interested in using this project, please refer to the following guide
 
 - [Client Runbook](CLIENT.md)
 - [Server Runbook](SERVER.md)
+
+## Team
+
+<table>
+<tbody>
+    <tr>
+        <td align="center" valign="top">
+            <a href="https://github.com/tristanphan">
+            <img src="https://avatars.githubusercontent.com/u/10486660" width="100px;"/>
+            <br />
+            <b>Tristan Phan</b>
+            </a>
+        </td>
+        <td align="center" valign="top">
+            <a href="https://github.com/jenniq1461">
+            <img src="https://avatars.githubusercontent.com/u/147354257" width="100px;"/>
+            <br />
+            <b>Jennifer Quach</b>
+            </a>
+        </td>
+    </tr>
+</tbody>
+</table>

@@ -1,5 +1,5 @@
-#ifndef CS147_WIFI_MANAGER_H
-#define CS147_WIFI_MANAGER_H
+#ifndef SMOKEY_WIFI_MANAGER_H
+#define SMOKEY_WIFI_MANAGER_H
 
 
 #include "HttpClient.h"
@@ -24,4 +24,4 @@ private:
 };
 
 
-#endif //CS147_WIFI_MANAGER_H
+#endif //SMOKEY_WIFI_MANAGER_H

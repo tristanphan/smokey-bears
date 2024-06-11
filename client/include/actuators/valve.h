@@ -1,5 +1,5 @@
-#ifndef CS147_VALVE_H
-#define CS147_VALVE_H
+#ifndef SMOKEY_VALVE_H
+#define SMOKEY_VALVE_H
 
 #include <Servo.h>
 
@@ -15,4 +15,4 @@ private:
 };
 
 
-#endif //CS147_VALVE_H
+#endif //SMOKEY_VALVE_H

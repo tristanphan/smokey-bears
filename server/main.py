@@ -169,9 +169,9 @@ def update_alarm_status_flags_by_data():
 
 def set_alarm_status(status: bool, cause: Optional[str] = None):
     global alarm_status
-    alarm_status = status
-    if alarm_status:
+    if alarm_status != status and status is True:
         send_email(cause)
+    alarm_status = status
 
 
 def send_email(cause: Optional[str] = None):
@@ -184,8 +184,7 @@ def send_email(cause: Optional[str] = None):
         body += (f"<b>Latest temperature:</b> {data[-1][1]}ºC / {temperature_threshold}ºC<br/>"
                  f"<b>Latest gas level</b>: {data[-1][2]}% / {gas_level_threshold}%<br/>")
     else:
-        body += "<b>No sensor data available</b><br/>"
-    body += "<br/><br/><em>CS 147 Project</em>"
+        body += "<b>No sensor data available</b>"
 
     # Create message
     msg = EmailMessage()
@@ -196,7 +195,8 @@ def send_email(cause: Optional[str] = None):
     with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
         smtp_server.login(sender_email, sender_password)
         smtp_server.send_message(msg)
-    print("Email sent to " + ", ".join(email_recipients) + " with cause: " + (cause if cause is not None else "Unknown"))
+    print("Email sent to " + ", ".join(email_recipients) +
+          " with cause: " + (cause if cause is not None else "Unknown"))
 
 
 # noinspection HttpUrlsUsage

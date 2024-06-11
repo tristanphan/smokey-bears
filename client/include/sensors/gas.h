@@ -1,5 +1,5 @@
-#ifndef CS147_GAS_SENSOR_H
-#define CS147_GAS_SENSOR_H
+#ifndef SMOKEY_GAS_SENSOR_H
+#define SMOKEY_GAS_SENSOR_H
 
 #include "config.h"
 #include <Arduino.h>
@@ -13,4 +13,4 @@ public:
 };
 
 
-#endif //CS147_GAS_SENSOR_H
+#endif //SMOKEY_GAS_SENSOR_H
